@@ -25,7 +25,7 @@ class StripeService {
 
   Future<String> createStripeUser(CreateUserStripeModel userStripe) async {
     final response = await networkService.post(
-      ApiConst.createStripCustomer,
+      ApiConst.createStripeCustomer,
       userStripe.toJson(),
       {'Authorization': 'Bearer ${ApiKeys.stripeSecret}'},
     );
@@ -50,7 +50,7 @@ class StripeService {
  */
   Future<String> createEphermeralKey(String customerId) async {
     final response = await networkService.post(
-      ApiConst.createEpheremalKeys,
+      ApiConst.createEphemeralKeys,
       {'customer': customerId},
       {
         'Stripe-Version': '2023-08-16',
