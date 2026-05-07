@@ -3,8 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:payment/Features/checkout/presentation/logic/payment/payment_cubit.dart';
 import 'package:payment/Features/checkout/presentation/logic/payment/payment_state.dart';
 
-class MyCartBody extends StatelessWidget {
+class MyCartBody extends StatefulWidget {
   const MyCartBody({super.key});
+
+  @override
+  State<MyCartBody> createState() => _MyCartBodyState();
+}
+
+class _MyCartBodyState extends State<MyCartBody> {
+  PaymentMethod _selectedMethod = PaymentMethod.stripe;
 
   @override
   Widget build(BuildContext context) {
@@ -12,44 +19,10 @@ class MyCartBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Cart Items ──────────────────────────
-          const Text(
-            "Your items",
-            style: TextStyle(fontSize: 13, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          _buildCartItem(
-            "Nike Air Max",
-            "Size 42 · Qty 1",
-            "\$120.00",
-            Icons.shopping_bag,
-          ),
-          const SizedBox(height: 8),
-          _buildCartItem(
-            "Sony Headphones",
-            "Black · Qty 1",
-            "\$80.00",
-            Icons.headphones,
-          ),
-
-          const SizedBox(height: 16),
-
-          // ── Order Summary ────────────────────────
-          _buildSummaryCard(),
-
-          const SizedBox(height: 16),
-
-          // ── Payment Methods ──────────────────────
-          const Text(
-            "Payment method",
-            style: TextStyle(fontSize: 13, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
+          // ... باقي الكود
           _buildPaymentCard(context),
 
-          const SizedBox(height: 20),
-
-          // ── Pay Button ───────────────────────────
+          // ── Pay Button
           BlocConsumer<PaymentCubit, PaymentState>(
             listener: (context, state) {
               if (state is PaymentSuccessState) {
@@ -77,118 +50,24 @@ class MyCartBody extends StatelessWidget {
                       ? null
                       : () {
                           context.read<PaymentCubit>().makePayment(
-                            amount: "20500", // cents
+                            amount: "20500",
                             currency: "usd",
-                            
+                            method: _selectedMethod, // هنا بيبعت الاختيار
                           );
                         },
                   child: state is PaymentLoadingState
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Pay with Stripe — \$205.00",
-                          style: TextStyle(fontSize: 15, color: Colors.white),
+                      : Text(
+                          "Pay with ${_selectedMethod.name} — \$205.00",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.white,
+                          ),
                         ),
                 ),
               );
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  // ── Helpers ─────────────────────────────────────
-
-  Widget _buildCartItem(String name, String sub, String price, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: Colors.blue.shade400),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  sub,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            price,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        children: [
-          _summaryRow("Subtotal", "\$200.00"),
-          _summaryRow("Shipping", "\$5.00"),
-          const Divider(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Total",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const Text(
-                "\$205.00",
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF185FA5),
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-          Text(value, style: const TextStyle(fontSize: 13)),
         ],
       ),
     );
@@ -212,7 +91,8 @@ class MyCartBody extends StatelessWidget {
             badgeText: "Ready",
             badgeBg: const Color(0xFFEAF3DE),
             badgeColor: const Color(0xFF3B6D11),
-            onTap: () {},
+            isSelected: _selectedMethod == PaymentMethod.stripe,
+            onTap: () => setState(() => _selectedMethod = PaymentMethod.stripe),
           ),
           const Divider(height: 0.5, indent: 14),
           _paymentMethodTile(
@@ -220,24 +100,25 @@ class MyCartBody extends StatelessWidget {
             iconBg: const Color(0xFFE8F4FD),
             iconColor: Colors.blue,
             name: "PayPal",
-            desc: "onPressed: null",
+            desc: "Coming soon",
             badgeText: "Soon",
             badgeBg: const Color(0xFFF1EFE8),
             badgeColor: Colors.grey,
+            isSelected: false,
             onTap: null,
           ),
           const Divider(height: 0.5, indent: 14),
-          // Paymob — معطّل
           _paymentMethodTile(
             icon: Icons.payments,
             iconBg: const Color(0xFFEAFAF1),
             iconColor: Colors.green,
             name: "Paymob",
-            desc: "onPressed: null",
-            badgeText: "Soon",
-            badgeBg: const Color(0xFFF1EFE8),
-            badgeColor: Colors.grey,
-            onTap: null,
+            desc: "Pay with Paymob",
+            badgeText: "Ready",
+            badgeBg: const Color(0xFFEAF3DE),
+            badgeColor: const Color(0xFF3B6D11),
+            isSelected: _selectedMethod == PaymentMethod.paymob,
+            onTap: () => setState(() => _selectedMethod = PaymentMethod.paymob),
           ),
         ],
       ),
@@ -253,12 +134,14 @@ class MyCartBody extends StatelessWidget {
     required String badgeText,
     required Color badgeBg,
     required Color badgeColor,
+    required bool isSelected,
     required VoidCallback? onTap,
   }) {
     return Opacity(
       opacity: onTap == null ? 0.45 : 1.0,
       child: ListTile(
         onTap: onTap,
+        tileColor: isSelected ? Colors.blue.shade50 : null, 
         leading: Container(
           width: 36,
           height: 36,
@@ -295,7 +178,12 @@ class MyCartBody extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
+            // checkmark لو متاختار
+            Icon(
+              isSelected ? Icons.check_circle : Icons.chevron_right,
+              color: isSelected ? Colors.blue : Colors.grey,
+              size: 18,
+            ),
           ],
         ),
       ),

@@ -5,4 +5,6 @@ abstract class CheckoutRepo {
   Future<ApiResult<void>> makePayment({
     required PaymentIntentRequestModel paymentIntent,
   });
+
+  Future<ApiResult<void>> makePaymentWithPaymob();
 }
